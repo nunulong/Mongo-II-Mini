@@ -14,6 +14,51 @@ const STATUS_USER_ERROR = 422;
 server.use(bodyParser.json());
 
 // Your API will be built out here.
+server.get('/users', (req, res) => {
+  Person.find({})
+    .then(users => {
+      res.status(200).json(users);
+    })
+    .catch(error => {
+      console.log(`Error: ${error}`);
+    });
+});
+
+server.get('/users/:direction', (req, res) => {
+  const dir = req.params.direction;
+  Person.find({}).sort({ firstName: `${dir}` })
+    .then(users => {
+      res.status(200).json(users);
+    })
+    .catch(err => {
+      console.log(`Error: ${err}`);
+    });
+});
+
+server.get('/user-get-friends/:id', (req, res) => {
+  const { id } = req.params;
+  Person.findById(id)
+    .then(user => {
+      res.status(200).json(user.friends);
+    })
+    .catch(err => {
+      console.log(`Error: ${err}`);
+    });
+});
+
+server.put('/users/:id', (req, res) => {
+  const { id } = req.params;
+  const updateInfo = req.body;
+  console.log(req.body);
+  Person.findByIdAndUpdate(id, updateInfo)
+    .then(user => {
+      user.save();
+      res.status(200).json({ message: "User updated successfully" });
+    })
+    .catch(err => {
+      console.log(`Error: ${err}`);
+    });
+});
 
 mongoose.Promise = global.Promise;
 const connect = mongoose.connect('mongodb://localhost/people', {
